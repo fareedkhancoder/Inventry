@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity2">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:theme="@style/Theme.Inventry.AppBarOverlay">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width = "match_parent"
+            android:background="@drawable/rectangle"
+              app:popupTheme="@style/Theme.Inventry.PopupOverlay"
+            android:layout_height = "?attr/actionBarSize" />
+
+  </com.google.android.material.appbar.AppBarLayout>
+
+  <include layout="@layout/content_main"/>
+
+    <TextView
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:paddingEnd="16dp"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:textColor="#00FF00"
+        android:paddingBottom="8dp"
+        android:background="@drawable/rectangle2"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="30dp"
+        android:textSize="25dp"
+        android:text="Purchase "/>
+    <TextView
+        android:id="@+id/fab2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:paddingEnd="16dp"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:textColor="#00FF00"
+        android:paddingBottom="8dp"
+        android:background="@drawable/rectangle2"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="90dp"
+        android:textSize="25dp"
+        android:text="     Sale     "/>
+
+  </androidx.coordinatorlayout.widget.CoordinatorLayout>

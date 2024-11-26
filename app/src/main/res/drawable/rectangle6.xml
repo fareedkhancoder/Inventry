@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#7c7c7c"/>   <!-- Starting color (Red) -->
+                android:endColor="#00FF0000"  <!-- Ending color (Transparent Red) -->
+                android:angle="0"             <!-- Gradient direction: Top to Bottom -->
+            />
+            <corners android:radius="0dp" />  <!-- For sharp corners, set radius to 0 -->
+        </shape>
+    </item>
+</layer-list>

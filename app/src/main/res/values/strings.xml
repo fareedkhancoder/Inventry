@@ -1,0 +1,59 @@
+<resources>
+    <string name="app_name">Inventry</string>
+    <string name="title_activity_main2">MainActivity2</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Dashboard</string>
+    <string name="menu_gallery">Stocks</string>
+    <string name="menu_slideshow">Dues</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="stocks">Stocks</string>
+    <string name="dues">Dues</string>
+    <string name="inventry_management">Inventry Management</string>
+    <string name="system">System</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">Purchase Order</string>
+    <string name="second_fragment_label">Add Items to Purchase Order</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="lorem_ipsum">This Is First Fragment</string>
+    <string name="party_name">Party Name</string>
+    <string name="qty_00">Qty. 00</string>
+    <string name="save_new"><![CDATA[Save & New]]></string>
+    <string name="totals_taxes"><![CDATA[Totals & Taxes]]></string>
+    <string name="cancel">Cancel</string>
+
+
+    <string-array name="tax_options">
+        <item>None</item>
+        <item>Exempted</item>
+        <item>GST@0%</item>
+        <item>IGST@0%</item>
+        <item>GST@0.25%</item>
+        <item>IGST@0.25%</item>
+        <item>GST@3%</item>
+        <item>IGST@3%</item>
+        <item>GST@5%</item>
+        <item>IGST@5%</item>
+        <item>GST@12%</item>
+        <item>IGST@12%</item>
+        <item>GST@18%</item>
+        <item>IGST@18%</item>
+        <item>GST@28%</item>
+        <item>IGST@28%</item>
+
+    </string-array>
+    <string-array name="Category_options">
+        <item>None</item>
+        <item>Add New Category</item>
+
+    </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

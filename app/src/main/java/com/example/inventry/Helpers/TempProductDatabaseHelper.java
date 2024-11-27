@@ -6,14 +6,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.example.inventry.Classes.Product;
+import com.example.inventry.Classes.TempProduct;
 
-public class ProductDatabaseHelper extends SQLiteOpenHelper {
+public class TempProductDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "inventory.db";
     private static final int DATABASE_VERSION = 2;
-    // Singleton instance of ProductDatabaseHelper
-    private static ProductDatabaseHelper instance;
+    // Singleton instance of TempProductDatabaseHelper
+    private static TempProductDatabaseHelper instance;
 
     // Table name and columns
     private static final String TABLE_PRODUCTS = "products";
@@ -29,7 +29,7 @@ public class ProductDatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_TOTAL_AMOUNT = "total_amount";
     private static final String COLUMN_CATEGORY = "category";
 
-    public ProductDatabaseHelper(Context context) {
+    public TempProductDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -56,29 +56,29 @@ public class ProductDatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // Insert product data
-    public void addProduct(Product product) {
+    // Insert tempProduct data
+    public void addProduct(TempProduct tempProduct) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_NAME, product.getName());
-        values.put(COLUMN_QUANTITY, product.getQuantity());
-        values.put(COLUMN_RATE, product.getRate());
-        values.put(COLUMN_TAX_PERCENTAGE, product.getTaxPercentage());
-        values.put(COLUMN_TAX_AMOUNT, product.getTaxAmount());
-        values.put(COLUMN_DISCOUNT_PERCENTAGE, product.getDiscountPercentage());
-        values.put(COLUMN_DISCOUNT_AMOUNT, product.getDiscountAmount());
-        values.put(COLUMN_SUBTOTAL, product.getSubtotal());
-        values.put(COLUMN_TOTAL_AMOUNT, product.getTotalAmount());
-        values.put(COLUMN_CATEGORY, product.getCategory());
+        values.put(COLUMN_NAME, tempProduct.getName());
+        values.put(COLUMN_QUANTITY, tempProduct.getQuantity());
+        values.put(COLUMN_RATE, tempProduct.getRate());
+        values.put(COLUMN_TAX_PERCENTAGE, tempProduct.getTaxPercentage());
+        values.put(COLUMN_TAX_AMOUNT, tempProduct.getTaxAmount());
+        values.put(COLUMN_DISCOUNT_PERCENTAGE, tempProduct.getDiscountPercentage());
+        values.put(COLUMN_DISCOUNT_AMOUNT, tempProduct.getDiscountAmount());
+        values.put(COLUMN_SUBTOTAL, tempProduct.getSubtotal());
+        values.put(COLUMN_TOTAL_AMOUNT, tempProduct.getTotalAmount());
+        values.put(COLUMN_CATEGORY, tempProduct.getCategory());
 
         db.insert(TABLE_PRODUCTS, null, values);
         db.close();
     }
 
-    // Singleton pattern to get the same instance of ProductDatabaseHelper
-    public static synchronized ProductDatabaseHelper getInstance(Context context) {
+    // Singleton pattern to get the same instance of TempProductDatabaseHelper
+    public static synchronized TempProductDatabaseHelper getInstance(Context context) {
         if (instance == null) {
-            instance = new ProductDatabaseHelper(context.getApplicationContext());
+            instance = new TempProductDatabaseHelper(context.getApplicationContext());
         }
         return instance;
     }

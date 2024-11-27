@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.Cursor;
 import android.content.ContentValues;
 import android.database.SQLException;
+import android.util.Log;
 
 import com.example.inventry.Classes.Category;
 import com.example.inventry.Classes.Products;
@@ -154,13 +155,30 @@ public class CategoryDatabaseHelper extends android.database.sqlite.SQLiteOpenHe
 
     // Add a new category
     public long addCategory(Category category) {
+        // Get writable database
         SQLiteDatabase db = this.getWritableDatabase();
+
+        // Create a ContentValues object to store the data
         ContentValues values = new ContentValues();
         values.put(COLUMN_CATEGORY_NAME, category.getName());
         values.put(COLUMN_CATEGORY_DESCRIPTION, category.getDescription());
         values.put(COLUMN_CATEGORY_DATE, category.getDate());
 
-        return db.insert(TABLE_CATEGORIES, null, values);
+        // Insert the data into the table
+        long id = db.insert(TABLE_CATEGORIES, null, values);
+
+        // Log the inserted category ID (for debugging)
+        if (id != -1) {
+            Log.d("CategoryInsertion", "Inserted category with ID: " + id);
+        } else {
+            Log.d("CategoryInsertion", "Failed to insert category.");
+        }
+
+        // Close the database
+        db.close();
+
+        // Return the ID of the inserted category (or -1 if insertion failed)
+        return id;
     }
 
     // Get a category by ID
@@ -226,25 +244,54 @@ public class CategoryDatabaseHelper extends android.database.sqlite.SQLiteOpenHe
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(
                 TABLE_CATEGORIES,
-                new String[]{COLUMN_CATEGORY_ID, COLUMN_CATEGORY_NAME, COLUMN_CATEGORY_DESCRIPTION, COLUMN_CATEGORY_DATE}, // Include the ID column
+                new String[]{COLUMN_CATEGORY_ID, COLUMN_CATEGORY_NAME, COLUMN_CATEGORY_DESCRIPTION, COLUMN_CATEGORY_DATE},
                 null, null, null, null, null
         );
 
         if (cursor != null) {
             while (cursor.moveToNext()) {
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY_ID)); // Assuming COLUMN_ID is the ID column
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY_ID));
                 String name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY_NAME));
                 String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY_DESCRIPTION));
                 String date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY_DATE));
 
-                // Use the constructor that accepts ID
                 Category category = new Category(id, name, description, date);
                 categories.add(category);
             }
-            cursor.close(); // Always close the cursor
+            cursor.close();
         }
 
+        Log.d("GalleryFragment", "Total Categories fetched: " + categories.size());  // Add this log
         db.close(); // Close the database
+        return categories;
+    }
+
+    public List<Category> searchCategories(String query) {
+        List<Category> categories = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // Use a SQL query to filter categories based on the search query
+        String selection = COLUMN_CATEGORY_NAME + " LIKE ?";
+        String[] selectionArgs = new String[] { "%" + query + "%" };
+
+        // Execute the query
+        Cursor cursor = db.query(TABLE_CATEGORIES, null, selection, selectionArgs,
+                null, null, null);
+
+        // Process the results
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY_ID));
+                String name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY_NAME));
+                String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY_DESCRIPTION));
+                String date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY_DATE));
+
+                categories.add(new Category(id, name, description, date));
+            }
+            cursor.close();
+        }
+
+        db.close();
         return categories;
     }
 

@@ -6,13 +6,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import com.example.inventry.Helpers.ProductDatabaseHelper;
+import com.example.inventry.Helpers.TempProductDatabaseHelper;
 import com.example.inventry.databinding.FragmentHomeBinding;
 
 public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
-    private ProductDatabaseHelper dbHelper;
+    private TempProductDatabaseHelper dbHelper;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -21,7 +21,7 @@ public class HomeFragment extends Fragment {
         View root = binding.getRoot();
 
         // Initialize the database helper to interact with the database
-        dbHelper = ProductDatabaseHelper.getInstance(getContext());
+        dbHelper = TempProductDatabaseHelper.getInstance(getContext());
 
         // Call the method to reset the database when the fragment is created
         reset_db();

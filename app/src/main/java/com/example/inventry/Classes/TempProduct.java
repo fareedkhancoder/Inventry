@@ -2,7 +2,7 @@ package com.example.inventry.Classes;
 
 import java.io.Serializable;
 
-public class Product implements Serializable {
+public class TempProduct implements Serializable {
     private String name;
     private double quantity;
     private double rate;
@@ -15,8 +15,8 @@ public class Product implements Serializable {
     private String category;
 
     // Constructor
-    public Product(String name, double quantity, double rate, double taxPercentage, double taxAmount,
-                   double discountPercentage, double discountAmount, double subtotal, double totalAmount, String category) {
+    public TempProduct(String name, double quantity, double rate, double taxPercentage, double taxAmount,
+                       double discountPercentage, double discountAmount, double subtotal, double totalAmount, String category) {
         this.name = name;
         this.quantity = quantity;
         this.rate = rate;

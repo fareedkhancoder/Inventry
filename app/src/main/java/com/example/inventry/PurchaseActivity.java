@@ -15,13 +15,13 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.NestedScrollView;
 
-import com.example.inventry.Classes.Product;
+import com.example.inventry.Classes.TempProduct;
 import com.example.inventry.Helpers.CategoryDatabaseHelper;
-import com.example.inventry.Helpers.ProductDatabaseHelper;
+import com.example.inventry.Helpers.TempProductDatabaseHelper;
 
 public class PurchaseActivity extends AppCompatActivity {
 
-    private ProductDatabaseHelper dbHelper;
+    private TempProductDatabaseHelper dbHelper;
     private CategoryDatabaseHelper dbHelper2;
 
     @Override
@@ -29,7 +29,7 @@ public class PurchaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_purchase);
 
-        dbHelper = new ProductDatabaseHelper(this);
+        dbHelper = new TempProductDatabaseHelper(this);
         dbHelper2 = new CategoryDatabaseHelper(this);
 
         LinearLayout linearLayout = findViewById(R.id.linearLayout);
@@ -55,16 +55,16 @@ public class PurchaseActivity extends AppCompatActivity {
 
         // Only populate the dynamic container if the subtotal is greater than zero
         if (itemSubtotal > 0) {
-            // Create Product object
-            Product product = new Product(
+            // Create TempProduct object
+            TempProduct tempProduct = new TempProduct(
                     productName, quantity, rate, taxPercentage, Double.parseDouble(taxAmount),
                     discountPercentage, discountAmount, itemSubtotal, totalAmount,category
             );
 
-            // Save the product to the database
-            dbHelper.addProduct(product);
+            // Save the tempProduct to the database
+            dbHelper.addProduct(tempProduct);
 
-            // Populate the dynamic container with the new product view
+            // Populate the dynamic container with the new tempProduct view
             populateDynamicContainer(dynamicContainer);
         }
 
@@ -124,7 +124,7 @@ public class PurchaseActivity extends AppCompatActivity {
 
         // Check if the product was inserted successfully
         if (result != -1) {
-            Toast.makeText(this, "Product added successfully!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "TempProduct added successfully!", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "Error adding product", Toast.LENGTH_SHORT).show();
         }
@@ -223,7 +223,7 @@ public class PurchaseActivity extends AppCompatActivity {
                     TextView itemSubtotalTextView = productView.findViewById(R.id.item_subtotal_amount);
 
                     snTextView.setText("#" + (dynamicContainer.getChildCount() + 1));
-                    productNameTextView.setText(quantity + " - " + (name != null ? name : "Unknown Product"));
+                    productNameTextView.setText(quantity + " - " + (name != null ? name : "Unknown TempProduct"));
                     totalAmountTextView.setText("₹" + totalAmount);
                     taxPercentageTextView.setText("Tax: " + taxPercentage + "%");
                     taxAmountTextView.setText("₹" + taxAmount);

@@ -19,6 +19,10 @@ public class CategoryDatabaseHelper extends android.database.sqlite.SQLiteOpenHe
     private static final int DATABASE_VERSION = 2;
 
 
+    private static CategoryDatabaseHelper instance;
+
+
+
     // Categories table
     public static final String TABLE_CATEGORIES = "categories";
     private static final String COLUMN_CATEGORY_ID = "id";
@@ -112,6 +116,13 @@ public class CategoryDatabaseHelper extends android.database.sqlite.SQLiteOpenHe
     public CategoryDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
+    // Public method to get the singleton instance
+    public static synchronized CategoryDatabaseHelper getInstance(Context context) {
+        if (instance == null) {
+            instance = new CategoryDatabaseHelper(context.getApplicationContext());
+        }
+        return instance;
+    }
 
     // SQL to create SUPPLIER table
     private static final String CREATE_TABLE_SUPPLIERS = "CREATE TABLE " + TABLE_SUPPLIERS + " (" +
@@ -122,6 +133,7 @@ public class CategoryDatabaseHelper extends android.database.sqlite.SQLiteOpenHe
             COLUMN_SUPPLIER_ADDRESS + " TEXT, " +
             COLUMN_REMARKS + " TEXT" +
             ");";
+
 
 
     @Override
@@ -576,4 +588,62 @@ public class CategoryDatabaseHelper extends android.database.sqlite.SQLiteOpenHe
 
         return purchaseDetails;
     }
+
+    // Get the total stock value from the Products table
+    public double getTotalStockValue() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        double totalStockValue = 0.0;
+
+        String query = "SELECT SUM(" + COLUMN_PURCHASE_RATE + " * " + COLUMN_AVAILABLE_QUANTITIES + ") FROM " + TABLE_PRODUCTS;
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            totalStockValue = cursor.getDouble(0);  // Get the total stock value
+            cursor.close();
+        }
+
+        return totalStockValue;
+    }
+
+    // Get top 3 products by stock value (quantity * purchase_rate)
+    public List<Products> getTop3ProductsByStockValue() {
+        List<Products> topProducts = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // Query to get the top 3 products by stock value (quantity * purchase_rate)
+        String query = "SELECT * FROM " + TABLE_PRODUCTS +
+                " ORDER BY " + COLUMN_AVAILABLE_QUANTITIES + " * " + COLUMN_PURCHASE_RATE + " DESC LIMIT 3";
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                // Safely get the column index for each column
+                int productIdIndex = cursor.getColumnIndex(COLUMN_PRODUCT_ID);
+                int productNameIndex = cursor.getColumnIndex(COLUMN_PRODUCT_NAME);
+                int availableQuantitiesIndex = cursor.getColumnIndex(COLUMN_AVAILABLE_QUANTITIES);
+                int purchaseRateIndex = cursor.getColumnIndex(COLUMN_PURCHASE_RATE);
+                int categoryIdIndex = cursor.getColumnIndex(COLUMN_CATEGORY_ID);
+
+                // Ensure the column index is valid (>= 0)
+                if (productIdIndex >= 0 && productNameIndex >= 0 && availableQuantitiesIndex >= 0 &&
+                        purchaseRateIndex >= 0 && categoryIdIndex >= 0) {
+
+                    // Create the Product object and add it to the list
+                    int productId = cursor.getInt(productIdIndex);
+                    String productName = cursor.getString(productNameIndex);
+                    int availableQuantities = cursor.getInt(availableQuantitiesIndex);
+                    double purchaseRate = cursor.getDouble(purchaseRateIndex);
+                    int categoryId = cursor.getInt(categoryIdIndex);
+
+                    // Add the product to the list
+                    topProducts.add(new Products(productId, productName, purchaseRate, availableQuantities, categoryId));
+                }
+            } while (cursor.moveToNext());
+
+            cursor.close();
+        }
+
+        return topProducts;
+    }
+
 }

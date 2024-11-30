@@ -155,23 +155,23 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:paddingStart="25dp"
-                android:text="@string/party_name"
+                android:text="@string/supplier_name"
                 android:textStyle="bold" />
 
             <EditText
-                android:id="@+id/editTextText2"
+                android:id="@+id/Supplier_Name_Input"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
                 android:background="@drawable/rectangle3"
                 android:ems="10"
-                android:hint="@string/party_name"
+                android:hint="@string/enter_supplier_name"
                 android:inputType="text"
                 android:paddingStart="10dp"
                 android:paddingEnd="10dp"
                 android:textColor="#060606"
-                android:textSize="15dp" />
+                android:textSize="15sp" />
 
 
             <LinearLayout
@@ -264,7 +264,7 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:orientation="horizontal">
 
@@ -288,6 +288,36 @@
                     android:text="₹0.0000"
                     android:textSize="22sp"
                     android:textStyle="italic" />
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="15dp"
+                android:layout_marginHorizontal="15dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:layout_weight="2"
+                    android:text="Select Payment Mode"/>
+
+                <Spinner
+                    android:id="@+id/payment_mode"
+                    android:layout_width="0dp"
+                    android:layout_height="28dp"
+                    android:layout_weight="1"
+                    android:paddingStart="5dp"
+                    android:entries="@array/payment_method"
+                    android:background="@drawable/rectangle8"
+                    android:gravity="center_horizontal"/>
+
+
+
             </LinearLayout>
 
 

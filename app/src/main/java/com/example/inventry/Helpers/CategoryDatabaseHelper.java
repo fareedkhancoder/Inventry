@@ -34,12 +34,69 @@ public class CategoryDatabaseHelper extends android.database.sqlite.SQLiteOpenHe
     public static final String COLUMN_AVAILABLE_QUANTITIES = "available_quantities";
     public static final String COLUMN_CATEGORY_ID_FK = "category_id";
 
+    // Purchase table
+    public static final String TABLE_PURCHASE = "purchase";
+    private static final String COLUMN_PURCHASE_ID = "purchase_id";
+    private static final String COLUMN_SUPPLIER_ID_FK = "supplier_id";
+    private static final String COLUMN_PURCHASE_DATE = "purchase_date";
+    private static final String COLUMN_TOTAL_COST = "total_cost";
+    private static final String COLUMN_PAYMENT_METHOD = "payment_method";
+
+    // PurchaseDetails table
+    public static final String TABLE_PURCHASE_DETAILS = "purchase_details";
+    private static final String COLUMN_PURCHASE_DETAIL_ID = "purchase_detail_id";
+    private static final String COLUMN_PURCHASE_ID_FK = "purchase_id";
+    private static final String COLUMN_PRODUCT_ID_FK = "product_id";
+    private static final String COLUMN_QUANTITY_PURCHASED = "quantity_purchased";
+    private static final String COLUMN_RATE = "rate";
+    private static final String COLUMN_DISCOUNT_PERCENTAGE = "discount_percentage";
+    private static final String COLUMN_DISCOUNT_AMOUNT = "discount_amount";
+    private static final String COLUMN_TAX_PERCENTAGE = "tax_percentage";
+    private static final String COLUMN_TAX_AMOUNT = "tax_amount";
+    private static final String COLUMN_TOTAL_PRODUCT_COST = "total_product_cost";
+    private static final String COLUMN_SUBTOTAL= "subtotal";
+
+    // Suppliers table
+    public static final String TABLE_SUPPLIERS = "suppliers";
+    public static final String COLUMN_SUPPLIER_ID = "supplier_id";
+    public static final String COLUMN_SUPPLIER_NAME = "supplier_name";
+    public static final String COLUMN_SUPPLIER_CONTACT = "supplier_contact";
+    public static final String COLUMN_SUPPLIER_EMAIL = "supplier_email";
+    public static final String COLUMN_SUPPLIER_ADDRESS = "supplier_address";
+    public static final String COLUMN_REMARKS = "remarks";
+
     // SQL to create categories table
     private static final String CREATE_TABLE_CATEGORIES = "CREATE TABLE " + TABLE_CATEGORIES + " (" +
             COLUMN_CATEGORY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             COLUMN_CATEGORY_NAME + " TEXT, " +
             COLUMN_CATEGORY_DESCRIPTION + " TEXT, " +
             COLUMN_CATEGORY_DATE + " TEXT" +
+            ");";
+
+    // SQL to create Purchase table
+    private static final String CREATE_TABLE_PURCHASE = "CREATE TABLE " + TABLE_PURCHASE + " (" +
+            COLUMN_PURCHASE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            COLUMN_SUPPLIER_ID_FK + " INTEGER, " +
+            COLUMN_PURCHASE_DATE + " TEXT, " +
+            COLUMN_TOTAL_COST + " REAL, " +
+            COLUMN_PAYMENT_METHOD + " TEXT" +
+            ");";
+
+    // SQL to create PurchaseDetails table
+    private static final String CREATE_TABLE_PURCHASE_DETAILS = "CREATE TABLE " + TABLE_PURCHASE_DETAILS + " (" +
+            COLUMN_PURCHASE_DETAIL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            COLUMN_PURCHASE_ID_FK + " INTEGER, " +
+            COLUMN_PRODUCT_ID_FK + " INTEGER, " +
+            COLUMN_QUANTITY_PURCHASED + " INTEGER, " +
+            COLUMN_RATE + " REAL, " +
+            COLUMN_DISCOUNT_PERCENTAGE + " REAL, " +
+            COLUMN_DISCOUNT_AMOUNT + " REAL, " +
+            COLUMN_TAX_PERCENTAGE + " REAL, " +
+            COLUMN_TAX_AMOUNT + " REAL, " +
+            COLUMN_TOTAL_PRODUCT_COST + " REAL, " +
+            COLUMN_SUBTOTAL + " REAL, " +
+            "FOREIGN KEY(" + COLUMN_PURCHASE_ID_FK + ") REFERENCES " + TABLE_PURCHASE + "(" + COLUMN_PURCHASE_ID + "), " +
+            "FOREIGN KEY(" + COLUMN_PRODUCT_ID_FK + ") REFERENCES " + TABLE_PRODUCTS + "(" + COLUMN_PRODUCT_ID + ")" +
             ");";
 
     // SQL to create products table
@@ -56,19 +113,174 @@ public class CategoryDatabaseHelper extends android.database.sqlite.SQLiteOpenHe
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    // SQL to create SUPPLIER table
+    private static final String CREATE_TABLE_SUPPLIERS = "CREATE TABLE " + TABLE_SUPPLIERS + " (" +
+            COLUMN_SUPPLIER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            COLUMN_SUPPLIER_NAME + " TEXT NOT NULL, " +
+            COLUMN_SUPPLIER_CONTACT + " TEXT, " +
+            COLUMN_SUPPLIER_EMAIL + " TEXT, " +
+            COLUMN_SUPPLIER_ADDRESS + " TEXT, " +
+            COLUMN_REMARKS + " TEXT" +
+            ");";
+
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_CATEGORIES);
         db.execSQL(CREATE_TABLE_PRODUCTS);
+        db.execSQL(CREATE_TABLE_PURCHASE);
+        db.execSQL(CREATE_TABLE_PURCHASE_DETAILS);
+        db.execSQL(CREATE_TABLE_SUPPLIERS);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PURCHASE_DETAILS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PURCHASE);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_PRODUCTS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_CATEGORIES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_SUPPLIERS);
         onCreate(db);
     }
+      //Method for deleting a supplier
+    public void deleteSupplier(int supplierId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_SUPPLIERS, COLUMN_SUPPLIER_ID + " = ?", new String[]{String.valueOf(supplierId)});
+    }
+
+
+    // Method to get supplier ID by name
+    public int getSupplierIdByName(String name) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        int supplierId = -1; // Default to -1 if the supplier is not found
+
+        try {
+            // Query the Suppliers table for the supplier name
+            cursor = db.query(
+                    TABLE_SUPPLIERS, // Table name
+                    new String[]{COLUMN_SUPPLIER_ID}, // Columns to fetch
+                    COLUMN_SUPPLIER_NAME + " = ?", // WHERE clause
+                    new String[]{name}, // WHERE arguments
+                    null, null, null
+            );
+
+            if (cursor != null && cursor.moveToFirst()) {
+                // Get the supplier ID from the cursor
+                supplierId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_SUPPLIER_ID));
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // Log any errors
+        } finally {
+            if (cursor != null) {
+                cursor.close(); // Always close the cursor
+            }
+        }
+
+        return supplierId;
+    }
+
+    // Method to update a supplier
+
+    public int updateSupplier(int supplierId, String name, String contact, String email, String address, String remarks) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_SUPPLIER_NAME, name);
+        values.put(COLUMN_SUPPLIER_CONTACT, contact);
+        values.put(COLUMN_SUPPLIER_EMAIL, email);
+        values.put(COLUMN_SUPPLIER_ADDRESS, address);
+        values.put(COLUMN_REMARKS, remarks);
+
+        return db.update(TABLE_SUPPLIERS, values, COLUMN_SUPPLIER_ID + " = ?", new String[]{String.valueOf(supplierId)});
+    }
+
+
+    // Method to fetch all the suppliers
+
+    public List<String> getAllSuppliers() {
+        List<String> suppliers = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(
+                TABLE_SUPPLIERS,
+                new String[]{COLUMN_SUPPLIER_ID, COLUMN_SUPPLIER_NAME, COLUMN_SUPPLIER_CONTACT},
+                null, null, null, null, COLUMN_SUPPLIER_NAME + " ASC"
+        );
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                String supplier = "ID: " + cursor.getInt(0) + ", Name: " + cursor.getString(1);
+                suppliers.add(supplier);
+            }
+            cursor.close();
+        }
+        return suppliers;
+    }
+
+
+    // Method to add a new supplier
+
+    public long addSupplier(String name, String contact, String email, String address, String remarks) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_SUPPLIER_NAME, name);
+        values.put(COLUMN_SUPPLIER_CONTACT, contact);
+        values.put(COLUMN_SUPPLIER_EMAIL, email);
+        values.put(COLUMN_SUPPLIER_ADDRESS, address);
+        values.put(COLUMN_REMARKS, remarks);
+
+        return db.insert(TABLE_SUPPLIERS, null, values);
+    }
+
+    // Method to get the next purchase ID
+    public int getNextPurchaseId() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        int nextId = 1; // Default to 1 if the table is empty
+
+        try {
+            // Get the maximum ID from the Purchase table
+            cursor = db.rawQuery("SELECT MAX(" + COLUMN_PURCHASE_ID + ") FROM " + TABLE_PURCHASE, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int maxId = cursor.getInt(0);
+                nextId = maxId + 1; // Next ID is the max ID + 1
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close(); // Always close the cursor
+            }
+        }
+
+        return nextId;
+    }
+
+
+    // Method to get the next product ID
+    public int getNextProductId() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        int nextId = 1; // Default to 1 if the table is empty
+
+        try {
+            // Get the maximum ID from the Products table
+            cursor = db.rawQuery("SELECT MAX(" + COLUMN_PRODUCT_ID + ") FROM " + TABLE_PRODUCTS, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int maxId = cursor.getInt(0);
+                nextId = maxId; // Next ID is the max ID + 1
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close(); // Always close the cursor
+            }
+        }
+
+        return nextId;
+    }
+
+
 
     // Add a new product
     public long addProduct(String productName, double purchaseRate, int availableQuantities, int categoryId) {
@@ -301,5 +513,67 @@ public class CategoryDatabaseHelper extends android.database.sqlite.SQLiteOpenHe
         boolean exists = cursor.getCount() > 0;
         cursor.close();
         return exists;
+    }
+    // Add A new purchase
+    public long addPurchase(int supplierId, String purchaseDate, double totalCost, String paymentMethod) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_SUPPLIER_ID_FK, supplierId);
+        values.put(COLUMN_PURCHASE_DATE, purchaseDate);
+        values.put(COLUMN_TOTAL_COST, totalCost);
+        values.put(COLUMN_PAYMENT_METHOD, paymentMethod);
+
+        return db.insert(TABLE_PURCHASE, null, values);
+    }
+    // Add Purchase Details
+    public long addPurchaseDetails(int purchaseId, int productId, int quantityPurchased, double purchaseRate, double discPercentage, double discAmount, double taxPercentage, double taxAmount, double totalCost, double subtotal) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_PURCHASE_ID_FK, purchaseId);
+        values.put(COLUMN_PRODUCT_ID_FK, productId);
+        values.put(COLUMN_QUANTITY_PURCHASED, quantityPurchased);
+        values.put(COLUMN_RATE, purchaseRate);
+        values.put(COLUMN_DISCOUNT_PERCENTAGE, discPercentage);
+        values.put(COLUMN_DISCOUNT_AMOUNT, discAmount);
+        values.put(COLUMN_TAX_PERCENTAGE, taxPercentage);
+        values.put(COLUMN_TAX_AMOUNT, taxAmount);
+        values.put(COLUMN_TOTAL_PRODUCT_COST, totalCost);
+        values.put(COLUMN_SUBTOTAL, subtotal);
+
+        return db.insert(TABLE_PURCHASE_DETAILS, null, values);
+    }
+
+    public Cursor getAllPurchases() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.query(TABLE_PURCHASE, null, null, null, null, null, COLUMN_PURCHASE_DATE + " DESC");
+    }
+
+    public List<String> getPurchaseDetails(int purchaseId) {
+        List<String> purchaseDetails = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_PURCHASE_DETAILS,
+                null,
+                COLUMN_PURCHASE_ID_FK + " = ?",
+                new String[]{String.valueOf(purchaseId)},
+                null, null, null);
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                int productId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_PRODUCT_ID_FK));
+                int quantity = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_QUANTITY_PURCHASED));
+                double rate = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_RATE));
+                double cost = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_PRODUCT_COST));
+                double discPercentage = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_DISCOUNT_PERCENTAGE));
+                double discAmount = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_DISCOUNT_AMOUNT));
+                double taxPercentage = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_TAX_PERCENTAGE));
+                double taxAmount = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_TAX_AMOUNT));
+
+                purchaseDetails.add("Product ID: " + productId + ", Quantity: " + quantity + ", Rate: " + rate + ", Cost: " + cost + ", discount Percentage:" + discPercentage + "discount Amount:" + discAmount + "tax Percantage:" + taxPercentage + "tax Amount:" + taxAmount);
+            }
+            cursor.close();
+        }
+
+        return purchaseDetails;
     }
 }

@@ -48,6 +48,7 @@ public class AddProductActivity extends AppCompatActivity {
     private double discountValue = 0;
     private double subtotal = 0;
     private double totalAmount = 0;
+    private String Supplier_Name;
 
     // Flag to avoid recursive updates when modifying discount fields
     private boolean isUpdatingDiscount = false;
@@ -56,6 +57,12 @@ public class AddProductActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_product);
+
+
+
+        // Retrieve Supplier Name from the Intent
+        Intent intent = getIntent();
+        Supplier_Name = intent.getStringExtra("Supplier Name");
 
         // Initialize views
         itemNameEditText = findViewById(R.id.item_name);
@@ -323,19 +330,6 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
 
-
-    public void addCategory(Category category) {
-        SQLiteDatabase db = categoryDatabaseHelper.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_CATEGORY_NAME, category.getName());
-        values.put(COLUMN_DESCRIPTION, category.getDescription());
-        values.put(COLUMN_CATEGORY_DATE, category.getDate());
-
-        db.insert(TABLE_CATEGORIES, null, values);
-        db.close();
-    }
-
     private void updateCalculations() {
         subtotal = rate * quantity;
         double discount = discountPercentage > 0 ? (calculateAmount() * discountPercentage / 100) : discountValue;
@@ -480,6 +474,7 @@ public class AddProductActivity extends AppCompatActivity {
         intent.putExtra("TaxValue" , String.valueOf(taxAmount));
         intent.putExtra("totalAmount", totalAmount);
         intent.putExtra("Category" , getSelectedCategory());
+        intent.putExtra("Supplier Name", Supplier_Name);
 
 
         Toast.makeText(this, "Validation Successful. Proceeding to Purchase Activity", Toast.LENGTH_SHORT).show();
@@ -489,6 +484,7 @@ public class AddProductActivity extends AppCompatActivity {
 
     private void cancel(){
         Intent intent = new Intent(this, PurchaseActivity.class);
+        intent.putExtra("Supplier Name", Supplier_Name);
         startActivity(intent);
         finish();
 

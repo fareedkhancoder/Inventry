@@ -7,7 +7,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,10 +21,15 @@ import com.example.inventry.Classes.TempProduct;
 import com.example.inventry.Helpers.CategoryDatabaseHelper;
 import com.example.inventry.Helpers.TempProductDatabaseHelper;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class PurchaseActivity extends AppCompatActivity {
 
     private TempProductDatabaseHelper dbHelper;
     private CategoryDatabaseHelper dbHelper2;
+    String supplierName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,9 +54,17 @@ public class PurchaseActivity extends AppCompatActivity {
         double totalAmount = intent.getDoubleExtra("totalAmount", 0);
         double rate = intent.getDoubleExtra("rate", 0);
         String category = intent.getStringExtra("Category");
+        String Supplier_Name = intent.getStringExtra("Supplier Name");
+
 
         // Find the dynamic container
+        Spinner spinnerPaymentMode = findViewById(R.id.payment_mode);
         LinearLayout dynamicContainer = findViewById(R.id.dynamicContainer);
+        EditText supplierNameInput = findViewById(R.id.Supplier_Name_Input);
+        supplierNameInput.setText(Supplier_Name);
+
+
+
 
 
 
@@ -85,19 +100,68 @@ public class PurchaseActivity extends AppCompatActivity {
         // Set click listeners
         findViewById(R.id.Back_Button).setOnClickListener(v -> reset_db());
         findViewById(R.id.buttonFirst).setOnClickListener(v -> {
+            String SupplierName = supplierNameInput.getText().toString().trim();
             intent.setClass(PurchaseActivity.this, AddProductActivity.class);
+            intent.putExtra("Supplier Name",SupplierName);
             startActivity(intent);
             finish();
         });
         findViewById(R.id.Purchase_button).setOnClickListener(v ->{
             add_to_db_2();
             Toast.makeText(this, "Purchased successfully!", Toast.LENGTH_SHORT).show();
+            String SupplierName = supplierNameInput.getText().toString().trim();
+            String payment_Method = spinnerPaymentMode.getSelectedItem().toString();
+            int Supplier_ID = checkAndAddSupplier(SupplierName);
+            long result = dbHelper2.addPurchase(Supplier_ID,getCurrentDate(),totalAmount,payment_Method);
+            if (result == -1) {
+                Toast.makeText(this, "Error during Purchase", Toast.LENGTH_SHORT).show();
+            }
+            // Clear the database
+            dbHelper.clearProducts();
+            refreshDynamicLayout();
+
 
         });
         findViewById(R.id.Cancel).setOnClickListener(v ->{
             reset_db();
         });
     }
+
+    public void refreshDynamicLayout() {
+        LinearLayout dynamicContainer = findViewById(R.id.dynamicContainer);
+        dynamicContainer.removeAllViews(); // Clear the container
+        populateDynamicContainer(dynamicContainer); // Repopulate with new data (e.g., database data)
+    }
+
+
+    public int checkAndAddSupplier(String supplierName) {
+        CategoryDatabaseHelper dbHelper = new CategoryDatabaseHelper(this);
+
+        // Step 1: Check if the supplier exists
+        int supplierId = dbHelper.getSupplierIdByName(supplierName);
+
+        // Step 2: If the supplier doesn't exist, add a new supplier with placeholder values
+        if (supplierId == -1) {
+            // Placeholder values for missing fields
+            String defaultContact = "N/A";
+            String defaultEmail = "unknown@example.com";
+            String defaultAddress = "No Address Provided";
+            String defaultRemarks = "No Remarks";
+
+            // Add the new supplier and retrieve its ID
+            long newSupplierId = dbHelper.addSupplier(supplierName, defaultContact, defaultEmail, defaultAddress, defaultRemarks);
+
+            if (newSupplierId != -1) {
+                supplierId = (int) newSupplierId; // Cast to int as IDs are typically integers
+            } else {
+                Log.e("CheckAndAddSupplier", "Failed to add supplier: " + supplierName);
+            }
+        }
+
+        // Step 3: Return the supplier ID
+        return supplierId;
+    }
+
 
     private void reset_db() {
         new AlertDialog.Builder(this)
@@ -117,17 +181,6 @@ public class PurchaseActivity extends AppCompatActivity {
                 })
                 .setCancelable(false) // Prevent the dialog from being dismissed by tapping outside
                 .show();
-    }
-    private void insertProduct(String productName, double purchaseRate, int availableQuantities, int categoryId) {
-        // Insert the product into the database
-        long result = dbHelper2.addProduct(productName, purchaseRate, availableQuantities, categoryId);
-
-        // Check if the product was inserted successfully
-        if (result != -1) {
-            Toast.makeText(this, "TempProduct added successfully!", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Error adding product", Toast.LENGTH_SHORT).show();
-        }
     }
 
 
@@ -154,8 +207,10 @@ public class PurchaseActivity extends AppCompatActivity {
                 .show();
     }
 
-
-
+    private String getCurrentDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        return sdf.format(new Date());
+    }
 
 
     public void scrollToLastChild(NestedScrollView nestedScrollView) {
@@ -289,16 +344,24 @@ public class PurchaseActivity extends AppCompatActivity {
                     double totalAmount = cursor.getDouble(totalAmountIndex);
                     String category = cursor.getString(categoryIndex);
 
-                    // Get the product ID based on the name
+                    // Get the category ID based on the name
                     if (dbHelper2 != null) {
                         int categoryId = dbHelper2.getCategoryIdByName(category);
                         Log.d("add_to_db_2", "categoryId: " + categoryId);
 
+
                         // Insert product into the database2
                         long result = dbHelper2.addProduct(name, rate, quantity, categoryId);
-                        if (result != -1) {
-                            Toast.makeText(this, "Products added successfully!", Toast.LENGTH_SHORT).show();
-                        } else {
+                        if (result == -1) {
+                            Toast.makeText(this, "Error adding products.", Toast.LENGTH_SHORT).show();
+                        }
+                        int PurchaseId = dbHelper2.getNextPurchaseId();
+                        int ProductId = dbHelper2.getNextProductId();
+
+                        // Insert Product detail to purchaseDetail Table
+
+                        long result2 = dbHelper2.addPurchaseDetails(PurchaseId,ProductId,quantity,rate,discountPercentage,discountAmount,taxPercentage,taxAmount,totalAmount,subtotal);
+                        if (result == -1) {
                             Toast.makeText(this, "Error adding products.", Toast.LENGTH_SHORT).show();
                         }
                     } else {

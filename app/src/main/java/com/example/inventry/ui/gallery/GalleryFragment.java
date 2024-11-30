@@ -66,7 +66,6 @@ public class GalleryFragment extends Fragment {
             // Toggle visibility of the SearchView
             toggleSearchView();
             // Adjust the marginTop of ViewPager2
-            updateViewPagerMarginTop();
 
             clearEditText(searchView);
 
@@ -97,7 +96,6 @@ public class GalleryFragment extends Fragment {
                     (event != null && event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                 // Perform the search and clear the text after submission
                 filterCategories(v.getText().toString());
-                revertViewPagerMarginTop();
                 toggleSearchView();
                 return true; // Return true to indicate the event is handled
             }
@@ -179,6 +177,7 @@ public class GalleryFragment extends Fragment {
         if (searchView.getVisibility() == View.GONE) {
             // Show the SearchView
             searchView.setVisibility(View.VISIBLE);
+            updateViewPagerMarginTop();
             // Set the focus to the SearchView so that the user can immediately type
             focusSearchView();
         } else {

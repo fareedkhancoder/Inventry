@@ -54,6 +54,12 @@
         <item>Add New Category</item>
 
     </string-array>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="supplier_name">Supplier Name</string>
+    <string name="enter_supplier_name">Enter Supplier Name</string>
+
+    <string-array name="payment_method">
+        <item>Cash</item>
+        <item>Online</item>
+
+    </string-array>
 </resources>

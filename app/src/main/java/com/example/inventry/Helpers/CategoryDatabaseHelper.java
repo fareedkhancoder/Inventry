@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.example.inventry.Classes.Category;
 import com.example.inventry.Classes.Products;
+import com.example.inventry.Classes.PurchaseHistory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
 public class CategoryDatabaseHelper extends android.database.sqlite.SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "inventoryDB";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 4;
 
 
     private static CategoryDatabaseHelper instance;
@@ -645,5 +646,225 @@ public class CategoryDatabaseHelper extends android.database.sqlite.SQLiteOpenHe
 
         return topProducts;
     }
+
+    public boolean isProductExists(int categoryId, String productName) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(
+                TABLE_PRODUCTS,
+                new String[]{COLUMN_PRODUCT_ID},
+                COLUMN_CATEGORY_ID_FK + " = ? AND " + COLUMN_PRODUCT_NAME + " = ?",
+                new String[]{String.valueOf(categoryId), productName},
+                null, null, null
+        );
+
+        boolean exists = cursor != null && cursor.getCount() > 0;
+        if (cursor != null) {
+            cursor.close();
+        }
+
+        return exists;
+    }
+
+    public int getAvailableQuantity(int productId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_PRODUCTS,
+                new String[]{COLUMN_AVAILABLE_QUANTITIES},
+                COLUMN_PRODUCT_ID + " = ?",
+                new String[]{String.valueOf(productId)},
+                null, null, null);
+
+        int quantity = 0;
+        if (cursor != null && cursor.moveToFirst()) {
+            int columnIndex = cursor.getColumnIndex(COLUMN_AVAILABLE_QUANTITIES);
+            if (columnIndex != -1) { // Check if column exists
+                quantity = cursor.getInt(columnIndex);
+            } else {
+                Log.e("DatabaseHelper", "Column not found: " + COLUMN_AVAILABLE_QUANTITIES);
+            }
+            cursor.close();
+        }
+        return quantity;
+    }
+
+
+    public double getLastPurchasePrice(int productId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT pd.rate " +
+                "FROM purchase_details pd " +
+                "INNER JOIN purchase p ON pd.purchase_id = p.purchase_id " +
+                "WHERE pd.product_id = ? " +
+                "ORDER BY p.purchase_date DESC " +
+                "LIMIT 1";
+
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(productId)});
+
+        double lastPrice = 0.0;
+        if (cursor != null && cursor.moveToFirst()) {
+            int rateIndex = cursor.getColumnIndex("rate");
+            if (rateIndex != -1) {
+                lastPrice = cursor.getDouble(rateIndex);
+            } else {
+                Log.e("DatabaseHelper", "Column not found: rate");
+            }
+            cursor.close();
+        }
+        return lastPrice;
+    }
+
+
+
+    public List<PurchaseHistory> getPurchaseHistory(int productId) {
+        List<PurchaseHistory> historyList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT p.purchase_date, pd.rate, pd.quantity_purchased " +
+                "FROM purchase_details pd " +
+                "INNER JOIN purchase p ON pd.purchase_id = p.purchase_id " +
+                "WHERE pd.product_id = ? " +
+                "ORDER BY p.purchase_date DESC";
+
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(productId)});
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                String date = null;
+                double rate = 0.0;
+                int quantity = 0;
+                String supplierName = null; // Initialize supplier name
+                int serialNumber = 0; // Initialize serial number
+
+                // Get column indices and validate
+                int dateIndex = cursor.getColumnIndex("purchase_date");
+                int rateIndex = cursor.getColumnIndex("rate");
+                int quantityIndex = cursor.getColumnIndex("quantity_purchased");
+
+                if (dateIndex != -1) {
+                    date = cursor.getString(dateIndex);
+                } else {
+                    Log.e("DatabaseHelper", "Column not found: purchase_date");
+                }
+
+                if (rateIndex != -1) {
+                    rate = cursor.getDouble(rateIndex);
+                } else {
+                    Log.e("DatabaseHelper", "Column not found: rate");
+                }
+
+                if (quantityIndex != -1) {
+                    quantity = cursor.getInt(quantityIndex);
+                } else {
+                    Log.e("DatabaseHelper", "Column not found: quantity_purchased");
+                }
+
+                // Get supplier name
+                supplierName = getSupplierByDate(date); // Fetch supplier for each purchase
+
+                // get serial number by date
+                serialNumber = getPurchaseSerialNumberByDate(date);
+
+                // Add to history list if all fields are valid
+                if (date != null) {
+                    historyList.add(new PurchaseHistory(date, rate, quantity, supplierName, serialNumber));
+                }
+
+            }
+            cursor.close();
+        }
+        return historyList;
+    }
+
+
+    public String getSupplierByDate(String purchaseDate) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT s.supplier_name " +
+                "FROM suppliers s " +
+                "INNER JOIN purchase p ON s.supplier_id = p.supplier_id " +
+                "WHERE p.purchase_date = ?";
+
+        // Pass purchaseDate as parameter
+        Cursor cursor = db.rawQuery(query, new String[]{purchaseDate});
+        String supplierName = null;
+
+        if (cursor != null && cursor.moveToFirst()) {
+            int supplierNameIndex = cursor.getColumnIndex("supplier_name");
+            if (supplierNameIndex != -1) {
+                supplierName = cursor.getString(supplierNameIndex);
+            }
+            cursor.close();
+        }
+
+        return supplierName;
+    }
+
+
+    public int getPurchaseSerialNumberByDate(String purchaseDate) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT purchase_id " +
+                "FROM purchase " +
+                "WHERE purchase_date = ?";
+
+        Cursor cursor = db.rawQuery(query, new String[]{purchaseDate});
+
+        // Log the column names for debugging
+        if (cursor != null) {
+            String[] columnNames = cursor.getColumnNames();
+            for (String columnName : columnNames) {
+                Log.d("Database", "Column: " + columnName); // Log all column names
+            }
+        }
+
+        int purchaseSerialNumber = -1;  // Default value if no record found
+
+        if (cursor != null && cursor.moveToFirst()) {
+            int columnIndex = cursor.getColumnIndex("purchase_id");
+            if (columnIndex != -1) {
+                purchaseSerialNumber = cursor.getInt(columnIndex);
+            } else {
+                Log.e("Database", "Column not found: purchase_id");
+            }
+            cursor.close();
+        }
+
+        return purchaseSerialNumber;  // Return the purchase ID or -1 if not found
+    }
+
+    public String getProductNameById(int productId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // SQL query to fetch the product name based on product ID
+        String query = "SELECT product_name FROM products WHERE id = ?";
+
+        // Execute the query and get a cursor
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(productId)});
+
+        String productName = null;
+
+        // Check if the cursor is not null and if it has a result
+        if (cursor != null && cursor.moveToFirst()) {
+            // Get the index of the product_name column
+            int productNameIndex = cursor.getColumnIndex("product_name");
+
+            // Check if the column exists and fetch the product name
+            if (productNameIndex != -1) {
+                productName = cursor.getString(productNameIndex);
+            }
+
+            // Close the cursor to release resources
+            cursor.close();
+        }
+
+        return productName;  // Return the product name or null if not found
+    }
+
+
+
+
+
+
+
+
 
 }

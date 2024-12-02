@@ -1,8 +1,16 @@
 package com.example.inventry;
 
 
+import static com.example.inventry.Helpers.CategoryDatabaseHelper.COLUMN_AVAILABLE_QUANTITIES;
+import static com.example.inventry.Helpers.CategoryDatabaseHelper.COLUMN_CATEGORY_ID_FK;
+import static com.example.inventry.Helpers.CategoryDatabaseHelper.COLUMN_PRODUCT_NAME;
+import static com.example.inventry.Helpers.CategoryDatabaseHelper.COLUMN_PURCHASE_RATE;
+import static com.example.inventry.Helpers.CategoryDatabaseHelper.TABLE_PRODUCTS;
+
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -349,20 +357,23 @@ public class PurchaseActivity extends AppCompatActivity {
                         int categoryId = dbHelper2.getCategoryIdByName(category);
                         Log.d("add_to_db_2", "categoryId: " + categoryId);
 
+                        // Check if the product exists in the given category
+                        boolean productExists = dbHelper2.isProductExists(categoryId, name);
 
-                        // Insert product into the database2
-                        long result = dbHelper2.addProduct(name, rate, quantity, categoryId);
-                        if (result == -1) {
-                            Toast.makeText(this, "Error adding products.", Toast.LENGTH_SHORT).show();
+                        if (productExists) {
+                            // Product already exists, so update it
+                            updateProduct(categoryId, name, quantity, rate);
+                        } else {
+                            // Product does not exist, add a new product
+                            addNewProduct(categoryId, name, quantity, rate);
                         }
-                        int PurchaseId = dbHelper2.getNextPurchaseId();
-                        int ProductId = dbHelper2.getNextProductId();
 
                         // Insert Product detail to purchaseDetail Table
-
-                        long result2 = dbHelper2.addPurchaseDetails(PurchaseId,ProductId,quantity,rate,discountPercentage,discountAmount,taxPercentage,taxAmount,totalAmount,subtotal);
-                        if (result == -1) {
-                            Toast.makeText(this, "Error adding products.", Toast.LENGTH_SHORT).show();
+                        int PurchaseId = dbHelper2.getNextPurchaseId();
+                        int ProductId = dbHelper2.getNextProductId();
+                        long result2 = dbHelper2.addPurchaseDetails(PurchaseId, ProductId, quantity, rate, discountPercentage, discountAmount, taxPercentage, taxAmount, totalAmount, subtotal);
+                        if (result2 == -1) {
+                            Toast.makeText(this, "Error adding product details.", Toast.LENGTH_SHORT).show();
                         }
                     } else {
                         // Handle the case where one of the indices is invalid
@@ -372,14 +383,84 @@ public class PurchaseActivity extends AppCompatActivity {
                 }
 
             } while (cursor.moveToNext());
+            cursor.close();
         } else {
             // Handle the case where the cursor is empty or null
             Toast.makeText(this, "No products found in the database", Toast.LENGTH_SHORT).show();
             Log.e("PurchaseActivity", "No products found or cursor is null");
         }
-
-        cursor.close();
     }
+
+
+    // Method to update an existing product
+    private void updateProduct(int categoryId, String productName, int quantity, double rate) {
+        SQLiteDatabase db = dbHelper2.getWritableDatabase();
+
+        // Step 1: Retrieve the existing product's quantity and rate
+        Cursor cursor = db.query(
+                TABLE_PRODUCTS,
+                new String[]{COLUMN_AVAILABLE_QUANTITIES, COLUMN_PURCHASE_RATE},
+                COLUMN_CATEGORY_ID_FK + " = ? AND " + COLUMN_PRODUCT_NAME + " = ?",
+                new String[]{String.valueOf(categoryId), productName},
+                null, null, null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            // Step 2: Safely retrieve existing quantity and rate
+            int existingQuantityIndex = cursor.getColumnIndex(COLUMN_AVAILABLE_QUANTITIES);
+            int existingRateIndex = cursor.getColumnIndex(COLUMN_PURCHASE_RATE);
+
+            // Check if column indices are valid
+            if (existingQuantityIndex >= 0 && existingRateIndex >= 0) {
+                int existingQuantity = cursor.getInt(existingQuantityIndex);
+                double existingRate = cursor.getDouble(existingRateIndex);
+
+                // Step 3: Add the new quantity to the existing quantity
+                int updatedQuantity = existingQuantity + quantity;
+
+                // Step 4: Replace the old rate with the new rate
+                double updatedRate = rate; // New rate will replace the old one
+
+                // Step 5: Update the product in the products table with new quantity and rate
+                ContentValues values = new ContentValues();
+                values.put(COLUMN_AVAILABLE_QUANTITIES, updatedQuantity);
+                values.put(COLUMN_PURCHASE_RATE, updatedRate);
+
+                // Perform the update
+                db.update(
+                        TABLE_PRODUCTS,
+                        values,
+                        COLUMN_CATEGORY_ID_FK + " = ? AND " + COLUMN_PRODUCT_NAME + " = ?",
+                        new String[]{String.valueOf(categoryId), productName}
+                );
+            } else {
+                // Handle case where column index is invalid
+                Log.e("updateProduct", "Column index invalid: existingQuantityIndex=" + existingQuantityIndex + ", existingRateIndex=" + existingRateIndex);
+            }
+
+            cursor.close();
+        } else {
+            // Handle case if the product doesn't exist in the database
+            if (cursor != null) {
+                cursor.close();
+            }
+            Log.e("updateProduct", "Product not found: " + productName);
+        }
+    }
+
+    // Method to add a new product
+    private void addNewProduct(int categoryId, String productName, int quantity, double rate) {
+        SQLiteDatabase db = dbHelper2.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_PRODUCT_NAME, productName);
+        values.put(COLUMN_PURCHASE_RATE, rate);
+        values.put(COLUMN_AVAILABLE_QUANTITIES, quantity);
+        values.put(COLUMN_CATEGORY_ID_FK, categoryId);
+
+        // Insert the new product into the products table
+        db.insert(TABLE_PRODUCTS, null, values);
+    }
+
 
 
     public void setLinearLayoutHeight(LinearLayout linearLayout, int height) {

@@ -1,5 +1,6 @@
 package com.example.inventry;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,15 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         holder.productName.setText(product.getProductName());
         holder.purchaseRate.setText(String.format("Rate: %.2f", product.getPurchaseRate()));
         holder.availableQuantities.setText(String.format("Available: %d", product.getAvailableQuantities()));
+
+
+        // Set a click listener on the item view
+        holder.itemView.setOnClickListener(v -> {
+            // Pass product ID to ProductDetailActivity
+            Intent intent = new Intent(v.getContext(), ProductDetailActivity.class);
+            intent.putExtra("product_id", product.getId());  // Pass product ID
+            v.getContext().startActivity(intent);
+        });
     }
 
     @Override

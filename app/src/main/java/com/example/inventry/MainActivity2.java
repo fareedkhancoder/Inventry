@@ -41,6 +41,16 @@ public class MainActivity2 extends AppCompatActivity {
             }
         });
 
+        // Handle FAB click to navigate to PurchaseActivity
+        binding.appBarMain.fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Create an Intent to start the new activity
+                Intent intent = new Intent(MainActivity2.this, SaleActivity.class);
+                startActivity(intent);
+            }
+        });
+
         // Drawer layout setup for navigation
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;

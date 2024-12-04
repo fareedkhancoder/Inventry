@@ -8,8 +8,8 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.example.inventry.Classes.Products;
-import com.example.inventry.Helpers.CategoryDatabaseHelper;
-import com.example.inventry.Helpers.TempProductDatabaseHelper;
+import com.example.inventry.Databases.CategoryDatabaseHelper;
+import com.example.inventry.Databases.TempProductDatabaseHelper;
 import com.example.inventry.databinding.FragmentHomeBinding;
 
 import java.util.List;

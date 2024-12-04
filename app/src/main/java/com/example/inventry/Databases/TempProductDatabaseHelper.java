@@ -1,4 +1,4 @@
-package com.example.inventry.Helpers;
+package com.example.inventry.Databases;
 
 import android.content.ContentValues;
 import android.content.Context;

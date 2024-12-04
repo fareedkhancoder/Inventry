@@ -22,4 +22,10 @@
         android:name="com.example.inventry.ui.slideshow.SlideshowFragment"
         android:label="@string/menu_slideshow"
         tools:layout="@layout/fragment_slideshow" />
+
+    <fragment
+        android:id="@+id/Parties"
+        android:name="com.example.inventry.ui.Parties.PartiesFragment"
+        android:label="Parties"
+        tools:layout="@layout/fragment_parties" />
 </navigation>

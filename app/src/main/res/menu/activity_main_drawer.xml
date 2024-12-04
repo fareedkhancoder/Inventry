@@ -16,5 +16,10 @@
             android:id="@+id/Dues"
             android:icon="@drawable/baseline_price_change_24"
             android:title="@string/dues" />
+
+        <item
+            android:id="@+id/Parties"
+            android:icon="@drawable/parties_icon"
+            android:title="Parties" />
     </group>
 </menu>

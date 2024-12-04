@@ -12,20 +12,18 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.SearchView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
-import com.example.inventry.Helpers.CategoryDatabaseHelper;
+import com.example.inventry.Databases.CategoryDatabaseHelper;
 import com.example.inventry.Classes.Category;
 import com.example.inventry.R;
 import com.example.inventry.ViewPagerAdapter;
 import com.example.inventry.databinding.FragmentGalleryBinding;
-import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class GalleryFragment extends Fragment {

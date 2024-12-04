@@ -10,9 +10,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.inventry.Classes.Products;
-import com.example.inventry.Helpers.CategoryDatabaseHelper;
-import com.example.inventry.R;
-import com.example.inventry.ProductAdapter;
+import com.example.inventry.Databases.CategoryDatabaseHelper;
 
 import java.util.List;
 

@@ -1,15 +1,15 @@
-package com.example.inventry.Helpers;
+package com.example.inventry.Databases;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.Cursor;
 import android.content.ContentValues;
-import android.database.SQLException;
 import android.util.Log;
 
 import com.example.inventry.Classes.Category;
 import com.example.inventry.Classes.Products;
 import com.example.inventry.Classes.PurchaseHistory;
+import com.example.inventry.Classes.Supplier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -210,24 +210,27 @@ public class CategoryDatabaseHelper extends android.database.sqlite.SQLiteOpenHe
 
     // Method to fetch all the suppliers
 
-    public List<String> getAllSuppliers() {
-        List<String> suppliers = new ArrayList<>();
+    public List<Supplier> getAllSuppliers() {
+        List<Supplier> suppliers = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(
-                TABLE_SUPPLIERS,
-                new String[]{COLUMN_SUPPLIER_ID, COLUMN_SUPPLIER_NAME, COLUMN_SUPPLIER_CONTACT},
-                null, null, null, null, COLUMN_SUPPLIER_NAME + " ASC"
-        );
 
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                String supplier = "ID: " + cursor.getInt(0) + ", Name: " + cursor.getString(1);
-                suppliers.add(supplier);
-            }
-            cursor.close();
+        // Query to fetch the necessary fields
+        Cursor cursor = db.rawQuery("SELECT supplier_name, supplier_contact FROM Suppliers", null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                // Get each supplier's name and contact from the cursor
+                String name = cursor.getString(cursor.getColumnIndexOrThrow("supplier_name"));
+                String contact = cursor.getString(cursor.getColumnIndexOrThrow("supplier_contact"));
+
+                // Create a new Supplier object and add it to the list
+                suppliers.add(new Supplier(name, contact));
+            } while (cursor.moveToNext());
         }
-        return suppliers;
+        cursor.close();
+        return suppliers; // Return the list of Supplier objects
     }
+
 
 
     // Method to add a new supplier
@@ -491,34 +494,7 @@ public class CategoryDatabaseHelper extends android.database.sqlite.SQLiteOpenHe
         return categories;
     }
 
-    public List<Category> searchCategories(String query) {
-        List<Category> categories = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
 
-        // Use a SQL query to filter categories based on the search query
-        String selection = COLUMN_CATEGORY_NAME + " LIKE ?";
-        String[] selectionArgs = new String[] { "%" + query + "%" };
-
-        // Execute the query
-        Cursor cursor = db.query(TABLE_CATEGORIES, null, selection, selectionArgs,
-                null, null, null);
-
-        // Process the results
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY_ID));
-                String name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY_NAME));
-                String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY_DESCRIPTION));
-                String date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY_DATE));
-
-                categories.add(new Category(id, name, description, date));
-            }
-            cursor.close();
-        }
-
-        db.close();
-        return categories;
-    }
 
     public boolean isCategoryExists(String name) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -858,6 +834,8 @@ public class CategoryDatabaseHelper extends android.database.sqlite.SQLiteOpenHe
 
         return productName;  // Return the product name or null if not found
     }
+
+
 
 
 

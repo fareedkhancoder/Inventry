@@ -1,11 +1,11 @@
 package com.example.inventry;
 
 
-import static com.example.inventry.Helpers.CategoryDatabaseHelper.COLUMN_AVAILABLE_QUANTITIES;
-import static com.example.inventry.Helpers.CategoryDatabaseHelper.COLUMN_CATEGORY_ID_FK;
-import static com.example.inventry.Helpers.CategoryDatabaseHelper.COLUMN_PRODUCT_NAME;
-import static com.example.inventry.Helpers.CategoryDatabaseHelper.COLUMN_PURCHASE_RATE;
-import static com.example.inventry.Helpers.CategoryDatabaseHelper.TABLE_PRODUCTS;
+import static com.example.inventry.Databases.CategoryDatabaseHelper.COLUMN_AVAILABLE_QUANTITIES;
+import static com.example.inventry.Databases.CategoryDatabaseHelper.COLUMN_CATEGORY_ID_FK;
+import static com.example.inventry.Databases.CategoryDatabaseHelper.COLUMN_PRODUCT_NAME;
+import static com.example.inventry.Databases.CategoryDatabaseHelper.COLUMN_PURCHASE_RATE;
+import static com.example.inventry.Databases.CategoryDatabaseHelper.TABLE_PRODUCTS;
 
 import android.content.ContentValues;
 import android.content.Intent;
@@ -26,8 +26,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.NestedScrollView;
 
 import com.example.inventry.Classes.TempProduct;
-import com.example.inventry.Helpers.CategoryDatabaseHelper;
-import com.example.inventry.Helpers.TempProductDatabaseHelper;
+import com.example.inventry.Databases.CategoryDatabaseHelper;
+import com.example.inventry.Databases.TempProductDatabaseHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

@@ -1,14 +1,6 @@
 package com.example.inventry;
 
-import static android.app.DownloadManager.COLUMN_DESCRIPTION;
-
-import static com.example.inventry.Helpers.CategoryDatabaseHelper.COLUMN_CATEGORY_DATE;
-import static com.example.inventry.Helpers.CategoryDatabaseHelper.COLUMN_CATEGORY_NAME;
-import static com.example.inventry.Helpers.CategoryDatabaseHelper.TABLE_CATEGORIES;
-
-import android.content.ContentValues;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -25,7 +17,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.inventry.Classes.Category;
-import com.example.inventry.Helpers.CategoryDatabaseHelper;
+import com.example.inventry.Databases.CategoryDatabaseHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

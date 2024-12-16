@@ -37,6 +37,7 @@ public class PurchaseActivity extends AppCompatActivity {
 
     private TempProductDatabaseHelper dbHelper;
     private CategoryDatabaseHelper dbHelper2;
+    private LinearLayout dynamicContainer;
     String supplierName;
 
     @Override
@@ -67,7 +68,7 @@ public class PurchaseActivity extends AppCompatActivity {
 
         // Find the dynamic container
         Spinner spinnerPaymentMode = findViewById(R.id.payment_mode);
-        LinearLayout dynamicContainer = findViewById(R.id.dynamicContainer);
+        dynamicContainer = findViewById(R.id.dynamicContainer);
         EditText supplierNameInput = findViewById(R.id.Supplier_Name_Input);
         supplierNameInput.setText(Supplier_Name);
 
@@ -128,7 +129,6 @@ public class PurchaseActivity extends AppCompatActivity {
             dbHelper.clearProducts();
             refreshDynamicLayout();
 
-
         });
         findViewById(R.id.Cancel).setOnClickListener(v ->{
             reset_db();
@@ -136,9 +136,7 @@ public class PurchaseActivity extends AppCompatActivity {
     }
 
     public void refreshDynamicLayout() {
-        LinearLayout dynamicContainer = findViewById(R.id.dynamicContainer);
-        dynamicContainer.removeAllViews(); // Clear the container
-        populateDynamicContainer(dynamicContainer); // Repopulate with new data (e.g., database data)
+        finish();
     }
 
 
@@ -172,23 +170,28 @@ public class PurchaseActivity extends AppCompatActivity {
 
 
     private void reset_db() {
-        new AlertDialog.Builder(this)
-                .setTitle("Confirm Exit")
-                .setMessage("Are you sure you want to go back? Unsaved changes will be lost.")
-                .setPositiveButton("Yes", (dialog, which) -> {
+        if (dynamicContainer.getChildCount() > 0) {
 
-                    // Clear the database
-                    dbHelper.clearProducts();
-                    // Call the super method to handle the default back button action
-                    super.onBackPressed();
-                })
-                .setNegativeButton("No", (dialog, which) -> {
+            new AlertDialog.Builder(this)
+                    .setTitle("Confirm Exit")
+                    .setMessage("Are you sure you want to go back? Unsaved changes will be lost.")
+                    .setPositiveButton("Yes", (dialog, which) -> {
 
-                    // Dismiss the dialog if user cancels
-                    dialog.dismiss();
-                })
-                .setCancelable(false) // Prevent the dialog from being dismissed by tapping outside
-                .show();
+                        // Clear the database
+                        dbHelper.clearProducts();
+                        // Call the super method to handle the default back button action
+                        super.onBackPressed();
+                    })
+                    .setNegativeButton("No", (dialog, which) -> {
+
+                        // Dismiss the dialog if user cancels
+                        dialog.dismiss();
+                    })
+                    .setCancelable(false) // Prevent the dialog from being dismissed by tapping outside
+                    .show();
+        }else {
+            finish();
+        }
     }
 
 
@@ -196,23 +199,28 @@ public class PurchaseActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         // Create a confirmation dialog
-        new AlertDialog.Builder(this)
-                .setTitle("Confirm Exit")
-                .setMessage("Are you sure you want to go back? Unsaved changes will be lost.")
-                .setPositiveButton("Yes", (dialog, which) -> {
+        if (dynamicContainer.getChildCount() > 0) {
 
-                    // Clear the database
-                    dbHelper.clearProducts();
-                    // Call the super method to handle the default back button action
-                    super.onBackPressed();
-                })
-                .setNegativeButton("No", (dialog, which) -> {
+            new AlertDialog.Builder(this)
+                    .setTitle("Confirm Exit")
+                    .setMessage("Are you sure you want to go back? Unsaved changes will be lost.")
+                    .setPositiveButton("Yes", (dialog, which) -> {
 
-                    // Dismiss the dialog if user cancels
-                    dialog.dismiss();
-                })
-                .setCancelable(false) // Prevent the dialog from being dismissed by tapping outside
-                .show();
+                        // Clear the database
+                        dbHelper.clearProducts();
+                        // Call the super method to handle the default back button action
+                        super.onBackPressed();
+                    })
+                    .setNegativeButton("No", (dialog, which) -> {
+
+                        // Dismiss the dialog if user cancels
+                        dialog.dismiss();
+                    })
+                    .setCancelable(false) // Prevent the dialog from being dismissed by tapping outside
+                    .show();
+        }else {
+            finish();
+        }
     }
 
     private String getCurrentDate() {
@@ -309,8 +317,6 @@ public class PurchaseActivity extends AppCompatActivity {
 
             } while (cursor.moveToNext());
         } else {
-            // Handle the case where the cursor is empty or null
-            Toast.makeText(this, "No products found in the database", Toast.LENGTH_SHORT).show();
         }
 
         cursor.close();
@@ -386,7 +392,6 @@ public class PurchaseActivity extends AppCompatActivity {
             cursor.close();
         } else {
             // Handle the case where the cursor is empty or null
-            Toast.makeText(this, "No products found in the database", Toast.LENGTH_SHORT).show();
             Log.e("PurchaseActivity", "No products found or cursor is null");
         }
     }
